@@ -13,7 +13,7 @@ const Home = () => {
 			event.target.addTask.value = "";
 		}
 	};
-	console.log(task);
+	// console.log(task);
 	//Declarando la funcion para que el icono 'x' pueda eliminar tareas de la lista
 	const deleteTask = (index) => {
 		let newArr = task.filter((_,i) => i !== index)
@@ -23,6 +23,8 @@ const Home = () => {
 	//variable donde se guardara todos los usuarios
 	const [name,setName] = useState("");
 	const [usersList, setUsersList] =useState([])
+	const [userDeleted,setUserDeleted]=useState(false)
+	// const [getTask,setGetTask]=useState([]) no es necesario
 
 	//Creando usuario con Fetch - no lo recibe por body si no por params(enviar informacion por parametros)
 	function createUser() {
@@ -32,7 +34,8 @@ const Home = () => {
 		// considerando el id mayor que cero
 		.then((response)=>response.json())
 		.then((data) => {if (data.id) {
-			alert("Usuario creado con exito")			
+			alert("Usuario creado con exito")
+			setUserDeleted(prev=>!prev)			
 		} else {
 			alert("Upps...Exploto todo! Algo salio mal!")
 		}})
@@ -53,15 +56,51 @@ const Home = () => {
 			setUsersList(data.users)
 		})
 	};
+	//creando funcion para eliminar usuarios
+	const deleteUser=()=> {
+		fetch(`https://playground.4geeks.com/todo/users/${name}`, {
+			method: "DELETE"
+		})
+		// .then((response)=>response.json()) porque es un string7no es json
+		.then((data) => {
+			console.log("esta es la data", data);
+			if (data.ok) {
+				alert("Usuario eliminado con exito")
+				setUserDeleted(prev=>!prev)			
+			} else {
+				alert("upss exploto")
+			}
+		})
+	}
+	// .catch((error)=>console.log(error))
+	const getList=()=>{
+		console.log("1este es el nomb agenda busc",name);
+		
+		fetch(`https://playground.4geeks.com/todo/users/${name}`)
+		.then((response)=>{
+			console.log("2esto es response",response)
+			return response.json()
+		})
+		.then((data) => {
+			console.log("3la daaaata",data)
+			console.log("4la daaaata todoooos", data.todos)
+			if (data.todos) {
+				setTask(data.todos)
+			}
+		})
+	}
 	//tenemos dos argumentos, una funcion y un array-->apenas se recargue la pagina, veremos la lista de usuarios
 	useEffect(()=>{
 		getUsers()
-	},[]);
+	},[userDeleted]);
+
 	return (
 		<div className="container-fluid p-5 m-0">
 			{/* input para introducir usuarios y boton que ejecute crear usuario*/}
 			<input type="text" onChange={(e)=>setName(e.target.value)}/>
 			<button onClick={createUser}>Create User</button>
+			<button onClick={deleteUser}>Delete User</button>
+			<button onClick={getList}>Get Task</button>
 			<label>Lista de Usuarios</label>
 			{
 				usersList.map((item,index)=>(
@@ -76,7 +115,7 @@ const Home = () => {
 					</li>
 					{
 						task.map((item, index) => (
-							<li id={index} key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={() => deleteTask(index)}></i></li>
+							<li id={index} key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item.label} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={() => deleteTask(index)}></i></li>
 						))
 					}
 					<li className="list-group-item text-secondary">{(task.length===0)? "No tasks, add a task" : "Finish your tasks! You won’t be sleeping tonight!"}</li>
