@@ -1,98 +1,98 @@
 import React, { useState, useEffect } from "react";
 import style from "./styles/Home.module.css";
+
 const Home = () => {
-    //declarando estados
 	const [task, setTask] = useState([]);
-    //declarando la funcion del evento submit para que agregue tareas
-	const sendData = (event) => {
-		event.preventDefault();
-		let valueInput = event.target.addTask.value
-		if (valueInput !== "") {
-			const newTask = task.concat(valueInput);
-			setTask(newTask);
-			event.target.addTask.value = "";
-		}
+	const [name, setName] = useState("");
+	const [usersList, setUsersList] = useState([]);
+	const [userDeleted, setUserDeleted] = useState(false);
+
+	const createUser = () => {
+		fetch(`https://playground.4geeks.com/todo/users/${name}`, {
+			method: "POST"
+		})
+		.then((response) => response.json())
+		.then((data) => {if (data.id) {
+			alert("Usuario creado con exito");
+			setUserDeleted(prev => !prev);
+		} else {
+			alert("Algo salió mal");
+		}})
+		.catch((error) => console.log(error))
 	};
-	// console.log(task);
-	//Declarando la funcion para que el icono 'x' pueda eliminar tareas de la lista
+	const getUsersList = () => {
+		fetch("https://playground.4geeks.com/todo/users")
+		.then((response) => response.json())
+		.then((data) => setUsersList(data.users))
+	};
+
+	const deleteUser = () => {
+		fetch(`https://playground.4geeks.com/todo/users/${name}`, {
+			method: "DELETE"
+		})
+		.then((data) => {
+			if (data.ok) {
+				alert("Usuario eliminado con exito");
+				setUserDeleted(prev => !prev);
+			} else {
+				alert("Algo salió mal");
+			}
+		})
+	};
+	const getTasksList = () => {
+		fetch(`https://playground.4geeks.com/todo/users/${name}`)
+		.then((response) => response.json())
+		.then((data) => {
+			if (data.todos) {
+				setTask(data.todos);
+			}
+		})
+	}
+	const createTask = (e) => {
+		e.preventDefault();
+		const valueInput = e.target.addTask.value
+		const newTask = {
+			label: valueInput,
+			is_done: false
+		}
+		if (valueInput !== "") {
+			e.target.addTask.value = "";
+			alert("Tarea creada con exito")
+		}
+		fetch(`https://playground.4geeks.com/todo/todos/${name}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "Application/json"
+			},
+			body: JSON.stringify(newTask)
+		})
+		.then((response) => response.json())
+		.then((data) => setTask(prevTask => [...prevTask, data]))
+		.catch((error) => console.log(error))
+	}
+
 	const deleteTask = (index) => {
 		let newArr = task.filter((_,i) => i !== index)
 		setTask(newArr);
 	};
-	//FETCH
-	//variable donde se guardara todos los usuarios
-	const [name,setName] = useState("");
-	const [usersList, setUsersList] =useState([])
-	const [userDeleted,setUserDeleted]=useState(false)
-	// const [getTask,setGetTask]=useState([]) no es necesario
+	
+	// const deleteTask = () => {
+	// 	fetch(`https://playground.4geeks.com/todo/todos/${}`, {
+	// 		method: "DELETE",
+	// 	})
+	// 	.then((data) => {
+	// 		if (data.ok) {
+	// 			setTask();
+	// 		} else {
+	// 			console.log("Algo salio mal");
+	// 		}
+	// 	})
+	// 	.catch((error) => console.log(error))
+	// };
 
-	//Creando usuario con Fetch - no lo recibe por body si no por params(enviar informacion por parametros)
-	function createUser() {
-		fetch(`https://playground.4geeks.com/todo/users/${name}`, {
-			method: "POST"
-		})
-		// considerando el id mayor que cero
-		.then((response)=>response.json())
-		.then((data) => {if (data.id) {
-			alert("Usuario creado con exito")
-			setUserDeleted(prev=>!prev)			
-		} else {
-			alert("Upps...Exploto todo! Algo salio mal!")
-		}})
-		.catch((error)=>console.log(error))
-	};
-	//Obteniendo usuarios de la data
-	//de forma nativa se manda con un GET, no es necesario colocarlo
-	const getUsers = () => {
-		fetch("https://playground.4geeks.com/todo/users")
-		//1era,puede estar pendiente de resolverse. resuelta y esta todo bien o puede haber salido un error, estos son los tres estados de la promesa
-		//error o resuelto, resuelto lo va a tratar el si no lo manda al catch
-		//response.json traduce de json a formato legible de javaescript (ya es la data js)
-		.then((response) => response.json())
-		//trata la data, lo resultante del cuerpo de codigo del then anterior es lo q recibe del then sgte (este espera al then anterior)
-		//data (objeto mayor) la informacion q esta en users es un array data.user (array de objetos), users es la propiedad
-		//la info lo vamos a guardar en un local
-		.then((data) =>{
-			setUsersList(data.users)
-		})
-	};
-	//creando funcion para eliminar usuarios
-	const deleteUser=()=> {
-		fetch(`https://playground.4geeks.com/todo/users/${name}`, {
-			method: "DELETE"
-		})
-		// .then((response)=>response.json()) porque es un string7no es json
-		.then((data) => {
-			console.log("esta es la data", data);
-			if (data.ok) {
-				alert("Usuario eliminado con exito")
-				setUserDeleted(prev=>!prev)			
-			} else {
-				alert("upss exploto")
-			}
-		})
-	}
-	// .catch((error)=>console.log(error))
-	const getList=()=>{
-		console.log("1este es el nomb agenda busc",name);
-		
-		fetch(`https://playground.4geeks.com/todo/users/${name}`)
-		.then((response)=>{
-			console.log("2esto es response",response)
-			return response.json()
-		})
-		.then((data) => {
-			console.log("3la daaaata",data)
-			console.log("4la daaaata todoooos", data.todos)
-			if (data.todos) {
-				setTask(data.todos)
-			}
-		})
-	}
-	//tenemos dos argumentos, una funcion y un array-->apenas se recargue la pagina, veremos la lista de usuarios
-	useEffect(()=>{
-		getUsers()
-	},[userDeleted]);
+	useEffect(() => {
+		getUsersList()
+	}, [userDeleted]);
 
 	return (
 		<div className="container-fluid p-5 m-0">
@@ -100,7 +100,8 @@ const Home = () => {
 			<input type="text" onChange={(e)=>setName(e.target.value)}/>
 			<button onClick={createUser}>Create User</button>
 			<button onClick={deleteUser}>Delete User</button>
-			<button onClick={getList}>Get Task</button>
+			<button onClick={getTasksList}>Get Task</button>
+
 			<label>Lista de Usuarios</label>
 			{
 				usersList.map((item,index)=>(
@@ -108,14 +109,14 @@ const Home = () => {
 				))
 			}
 			<h1 className="text-center fst-italic fw-bold display-1 mt-4 text-success">To Do List</h1>
-			<form className="p-1 w-75 mx-auto bg-danger-subtle rounded shadow" onSubmit={sendData}>
+			<form className="p-1 w-75 mx-auto bg-danger-subtle rounded shadow" onSubmit={createTask}>
 				<ul className="list-group">
 					<li className="list-group-item">
 						<input type="text" className={`form-control ${style.inputTask}`} id="addTask" placeholder="What needs to be done?"/>
 					</li>
 					{
 						task.map((item, index) => (
-							<li id={index} key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item.label} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={() => deleteTask(index)}></i></li>
+							<li key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item.label} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={()=>deleteTask(index)}></i></li>
 						))
 					}
 					<li className="list-group-item text-secondary">{(task.length===0)? "No tasks, add a task" : "Finish your tasks! You won’t be sleeping tonight!"}</li>
