@@ -20,6 +20,7 @@ const Home = () => {
 		}})
 		.catch((error) => console.log(error))
 	};
+	
 	const getUsersList = () => {
 		fetch("https://playground.4geeks.com/todo/users")
 		.then((response) => response.json())
@@ -57,7 +58,7 @@ const Home = () => {
 		}
 		if (valueInput !== "") {
 			e.target.addTask.value = "";
-			alert("Tarea creada con exito")
+			// alert("Tarea creada con exito")
 		}
 		fetch(`https://playground.4geeks.com/todo/todos/${name}`, {
 			method: "POST",
@@ -70,25 +71,18 @@ const Home = () => {
 		.then((data) => setTask(prevTask => [...prevTask, data]))
 		.catch((error) => console.log(error))
 	}
-
-	const deleteTask = (index) => {
-		let newArr = task.filter((_,i) => i !== index)
-		setTask(newArr);
-	};
 	
-	// const deleteTask = () => {
-	// 	fetch(`https://playground.4geeks.com/todo/todos/${}`, {
-	// 		method: "DELETE",
-	// 	})
-	// 	.then((data) => {
-	// 		if (data.ok) {
-	// 			setTask();
-	// 		} else {
-	// 			console.log("Algo salio mal");
-	// 		}
-	// 	})
-	// 	.catch((error) => console.log(error))
-	// };
+	const deleteTask = (id) => {
+		fetch(`https://playground.4geeks.com/todo/todos/${id}`, {
+			method: "DELETE",
+		})
+		.then((response) => {
+			console.log(response);
+			let newList = task.filter((item) => item.id !==id)
+			setTask(newList);
+		})
+		.catch((error) => console.log(error))
+	};
 
 	useEffect(() => {
 		getUsersList()
@@ -96,30 +90,46 @@ const Home = () => {
 
 	return (
 		<div className="container-fluid p-5 m-0">
-			{/* input para introducir usuarios y boton que ejecute crear usuario*/}
-			<input type="text" onChange={(e)=>setName(e.target.value)}/>
-			<button onClick={createUser}>Create User</button>
-			<button onClick={deleteUser}>Delete User</button>
-			<button onClick={getTasksList}>Get Task</button>
+			<h2 className="text-center fst-italic display-1 mt-4 text-success">To Do List</h2>
+			<div className="container p-1 w-75 mx-auto">
+				<div className="row">
+					<div className="col">
+						{/* input para introducir usuarios y boton que ejecute crear usuario*/}
+						<input className="form-control" id="addUser" type="text" placeholder="Add user" onChange={(e) => setName(e.target.value)} />
+					</div>
+					<div className="col">
+						<button className="border-0 rounded p-1 m-1" onClick={createUser}>Create User</button>
+					</div>
+				</div>
+				<div className="row">
+					<div className="col">
+						<select className="form-select mb-3" id="user-select" value={name} onChange={(e) => setName(e.target.value)}>
+							<option className="text-center">-----select user-----</option>
+							{
+								usersList.map((item, index) => (
+									<option key={index}>{item.name}</option>
+								))
+							}
+						</select>
+					</div>
+					<div className="col">
+						<button className="border-0 rounded p-1 m-1" onClick={deleteUser}>Delete User</button>
+						<button className="border-0 rounded p-1 m-1" onClick={getTasksList}>Get Task</button>
+					</div>
+				</div>
 
-			<label>Lista de Usuarios</label>
-			{
-				usersList.map((item,index)=>(
-					<h5 key={index}>{item.name}</h5>
-				))
-			}
-			<h1 className="text-center fst-italic fw-bold display-1 mt-4 text-success">To Do List</h1>
+			</div>
 			<form className="p-1 w-75 mx-auto bg-danger-subtle rounded shadow" onSubmit={createTask}>
 				<ul className="list-group">
 					<li className="list-group-item">
-						<input type="text" className={`form-control ${style.inputTask}`} id="addTask" placeholder="What needs to be done?"/>
+						<input type="text" className={`form-control w-100 ${style.inputTask}`} id="addTask" placeholder="What needs to be done?"/>
 					</li>
 					{
 						task.map((item, index) => (
-							<li key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item.label} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={()=>deleteTask(index)}></i></li>
+							<li key={index} className={`list-group-item d-flex justify-content-between ${style.listTask}`}> {item.label} <i className={`fa-solid fa-xmark bg-danger-subtle p-1 ${style.iconTask}`} onClick={()=>deleteTask(item.id)}></i></li>
 						))
 					}
-					<li className="list-group-item text-secondary">{(task.length===0)? "No tasks, add a task" : "Finish your tasks! You won’t be sleeping tonight!"}</li>
+					<li className="list-group-item text-secondary">{(task.length===0)? "No tasks, add a task" : "Finish your tasks!"}</li>
 					<li className="list-group-item fw-light fst-italic text-secondary">{task.length} item left</li>
 				</ul>
 			</form>
