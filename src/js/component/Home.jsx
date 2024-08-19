@@ -106,7 +106,7 @@ const Home = () => {
 							<option className="text-center">-----select user-----</option>
 							{
 								usersList.map((item, index) => (
-									<option key={index}>{item.id} {item.name}</option>
+									<option key={index}>{item.name}</option>
 								))
 							}
 						</select>
