@@ -89,16 +89,15 @@ const Home = () => {
 	}, [userDeleted]);
 
 	return (
-		<div className="container-fluid p-5 m-0">
-			<h2 className="text-center fst-italic display-1 mt-4 text-success">To Do List</h2>
+		<div className="container-fluid p-4 m-0">
+			<h2 className={`text-center display-1 my-5 fw-bold text-info ${style.titleToDo}`}>To Do List</h2>
 			<div className="container p-1 w-75 mx-auto">
 				<div className="row">
 					<div className="col">
-						{/* input para introducir usuarios y boton que ejecute crear usuario*/}
 						<input className="form-control" id="addUser" type="text" placeholder="Add user" onChange={(e) => setName(e.target.value)} />
 					</div>
 					<div className="col">
-						<button className="border-0 rounded p-1 m-1" onClick={createUser}>Create User</button>
+						<button className="border-1 rounded p-1 m-1 shadow-sm" onClick={createUser}>Create User</button>
 					</div>
 				</div>
 				<div className="row">
@@ -107,19 +106,19 @@ const Home = () => {
 							<option className="text-center">-----select user-----</option>
 							{
 								usersList.map((item, index) => (
-									<option key={index}>{item.name}</option>
+									<option key={index}>{item.id} {item.name}</option>
 								))
 							}
 						</select>
 					</div>
 					<div className="col">
-						<button className="border-0 rounded p-1 m-1" onClick={deleteUser}>Delete User</button>
-						<button className="border-0 rounded p-1 m-1" onClick={getTasksList}>Get Task</button>
+						<button className="border-1 rounded p-1 m-1 shadow-sm" onClick={deleteUser}>Delete User</button>
+						<button className="border-1 rounded p-1 m-1 shadow-sm" onClick={getTasksList}>Get Task</button>
 					</div>
 				</div>
 
 			</div>
-			<form className="p-1 w-75 mx-auto bg-danger-subtle rounded shadow" onSubmit={createTask}>
+			<form className="p-1 w-75 mx-auto rounded bg-secondary-subtle shadow" onSubmit={createTask}>
 				<ul className="list-group">
 					<li className="list-group-item">
 						<input type="text" className={`form-control w-100 ${style.inputTask}`} id="addTask" placeholder="What needs to be done?"/>
